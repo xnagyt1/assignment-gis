@@ -15,20 +15,23 @@ This is it in action:
 
 ![Screenshot](regions.png)
 
-The application has 2 separate parts, the client which is a [frontend web application](#frontend) using mapbox API and mapbox.js and the [backend application](#backend) written in [Rails](http://rubyonrails.org/), backed by PostGIS. The frontend application communicates with backend using a [REST API](#api).
+The application has 2 separate parts, the client which is a [frontend web application](#frontend) using mapbox GL API and mapbox-gl.js and the [backend application](#backend) written in [Python](https://www.python.org/) using Flask server, backed by PostGIS. The frontend application communicates with backend using a [REST API](#api).
 
 # Frontend
 
-The frontend application is a static HTML page (`index.html`), which shows a mapbox.js widget. It is displaying hotels, which are mostly in cities, thus the map style is based on the Emerald style. I modified the style to better highlight main sightseeing points, restaurants and bus stops, since they are all important when selecting a hotel. I also highlighted rails tracks to assist in finding a quiet location.
+The frontend application is a static HTML page (`index.html`), which shows a mapbox-gl.js widget. It is displaying terror attack in Ireland. The map stzle is simle "light". 
 
-All relevant frontend code is in `application.js` which is referenced from `index.html`. The frontend code is very simple, its only responsibilities are:
-- detecting user's location, using the standard [web location API](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/Using_geolocation)
-- displaying the sidebar panel with hotel list and filtering controls, driving the user interaction and calling the appropriate backend APIs
-- displaying geo features by overlaying the map with a geojson layer, the geojson is provided directly by backend APIs
+All relevant frontend code is in `index.html`.
+The frontend code is very simple, its only responsibilities are:
+- displaying the whole map
+- displaying the sidebar
+- displaying the informations on map (heatmap, markers, polygons)
+- handle users action (clicks)
+- adding layers and sources into map
 
 # Backend
 
-The backend application is written in Python. This part of applicaion is responsible for comunicating with database and send data to frontend layer. For getting datas we used queryies and forcommunication we used flask.
+The backend application was written in Python. This part of applicaion is responsible for comunicating with database and send data to frontend layer. For getting datas we used queryies and forcommunication we used flask.
 
 ## Data
 
