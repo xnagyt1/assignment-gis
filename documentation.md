@@ -43,7 +43,7 @@ Data about ireland were from Open Street Maps. I downloaded whole ireland (40 gb
 
 **Find terror attack in Ireland/United Kingdom**
 
-![Screenshot](attacks.png)
+![Screenshot](Attacks.png)
 
 **Get nearest shops to selected location**
 
