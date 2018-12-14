@@ -39,26 +39,73 @@ Terror attack data is from Kaggle. I downloaded the full dataset and uplouaded i
 
 Data about ireland were from Open Street Maps. I downloaded whole ireland (40 gb) and importet it using teh "osm2psql" tool.
 
-## Api
+## Queries
 
-**Find hotels in proximity to coordinates**
+**Find terror attack in Ireland**
 
-`GET /search?lat=25346&long=46346123`
+`SELECT city,ST_AsGeoJSON(geom) FROM attacks where country_text = 'Ireland'`
 
-**Find hotels by name, sorted by proximity and quality**
+**Get nearest shops to selected location**
 
-`GET /search?name=hviezda&lat=25346&long=46346123`
+`SELECT DISTINCT name,shop,ST_AsGeoJSON(ST_Transform (way, 4326)) as way,
+					ST_Distance(ST_Transform (way, 4326)::Geography , ST_SetSRID(ST_MakePoint(%s,%s), 4326)::Geography ) as dist_me 
+          FROM planet_osm_point where shop = 'supermarket' and name is not null
+					ORDER BY dist_me ASC LIMIT 10;`
+          
+**Get the nearest waters**
+
+'SELECT DISTINCT ST_AsGeoJSON(ST_Transform (way, 4326)) as way, 
+					ST_Distance(ST_Transform (way, 4326)::Geography , ST_SetSRID(ST_MakePoint(%s,%s), 4326)::Geography ) as dist_me
+					FROM planet_osm_polygon where water is not null and name is not null and 
+				    ST_Distance(ST_Transform (way, 4326)::Geography , ST_SetSRID(ST_MakePoint(%s,%s), 4326)::Geography ) < 2000
+					union
+					SELECT DISTINCT ST_AsGeoJSON(ST_Transform (way, 4326)) as way,
+				    ST_Distance(ST_Transform (way, 4326)::Geography , ST_SetSRID(ST_MakePoint(%s,%s), 4326)::Geography ) as dist_me
+					FROM planet_osm_polygon where waterway is not null and name is not null and 
+				    ST_Distance(ST_Transform (way, 4326)::Geography , ST_SetSRID(ST_MakePoint(%s,%s), 4326)::Geography )<2000
+					ORDER BY dist_me ASC LIMIT 200;'
+          
+**Get the regions near to the border, and compute the number of victioms**
+
+'select attacks.nkill, ST_AsGeoJSON(attacks.geom), attacks.geom, planet_osm_polygon.way,
+        ST_AsGeoJSON(ST_Transform (planet_osm_polygon.way, 4326)), t3.sum
+            from (select t1.name, t2.name, ST_AsGeoJSON(ST_Transform (t2.way, 4326)),t2.way
+            from (select name, way from planet_osm_polygon where admin_level::int = 4) as t1,
+              (select name, way from planet_osm_polygon where admin_level::int = 6) as t2
+            where ST_Intersects( ST_Transform (t1.way, 4326), ST_Transform (t2.way, 4326))
+            and not ST_Contains( ST_Transform (t1.way, 4326), ST_Transform (t2.way, 4326))) as planet_osm_polygon,
+            (SELECT city, ST_AsGeoJSON(geom),geom,nkill FROM attacks where country_text = 'Ireland' and nkill::int > 0) as attacks,
+            (select planet_osm_polygon.way, ST_AsGeoJSON(ST_Transform (planet_osm_polygon.way, 4326)), sum(attacks.nkill)
+                				   from (select t1.name, t2.name, ST_AsGeoJSON(ST_Transform (t2.way, 4326)),t2.way
+                           from (select name, way from planet_osm_polygon where admin_level::int = 4) as t1,
+                              (select name, way from planet_osm_polygon where admin_level::int = 6) as t2
+                           where ST_Intersects( ST_Transform (t1.way, 4326), ST_Transform (t2.way, 4326))
+                							 and not ST_Contains( ST_Transform (t1.way, 4326), ST_Transform (t2.way, 4326))) as planet_osm_polygon,
+                           (SELECT city, ST_AsGeoJSON(geom),geom,nkill FROM attacks where country_text = 'Ireland' and nkill::int > 0)                              as attacks
+                				   where ST_Intersects(ST_SetSRID(attacks.geom,4326), ST_Transform (planet_osm_polygon.way, 4326))
+                				   group by (planet_osm_polygon.way)) as t3		 
+             where ST_Intersects(ST_SetSRID(attacks.geom,4326), ST_Transform (planet_osm_polygon.way, 4326)) 
+             and planet_osm_polygon.way = t3.way'
 
 ### Response
 
-API calls return json responses with 2 top-level keys, `hotels` and `geojson`. `hotels` contains an array of hotel data for the sidebar, one entry per matched hotel. Hotel attributes are (mostly self-evident):
-```
-{
-  "name": "Modra hviezda",
-  "style": "modern", # cuisine style
-  "stars": 3,
-  "address": "Panska 31"
-  "image_url": "/assets/hotels/652.png"
-}
-```
-`geojson` contains a geojson with locations of all matched hotels and style definitions.
+The responses for queries are differents but every contains a geoinformation (points or polygons)
+These infromation is transformed into a valid geojson format. For this reason i was using json library in python:
+
+"data = {}
+    data['type'] = 'FeatureCollection'
+    datas = []
+    shops = getAllshops();
+    for i in range(len(shops)):
+        data1 = {}
+        data1['type'] = 'Feature'        
+        properties = {}
+        properties['name'] = shops[i][0]
+        properties['type'] = shops[i][1]
+        shop = json.loads(shops[i][2])
+        data1['properties'] = properties
+        data1['geometry'] = shop
+        datas.append(data1)
+        
+    data['features'] = datas
+    geo_json = json.dumps(data)"
