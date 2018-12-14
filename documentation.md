@@ -9,11 +9,11 @@ This application shows terror attacks in Ireland and/or in United Kingdom. Most 
 
 This is it in action:
 
-![Screenshot](heatmap.png)
+![Screenshot](images/heatmap.png)
 
-![Screenshot](markers.png)
+![Screenshot](images/markers.png)
 
-![Screenshot](regions.png)
+![Screenshot](images/regions.png)
 
 The application has 2 separate parts, the client which is a [frontend web application](#frontend) using mapbox GL API and mapbox-gl.js and the [backend application](#backend) written in [Python](https://www.python.org/) using Flask server, backed by PostGIS. The frontend application communicates with backend using a [REST API](#api).
 
@@ -43,21 +43,21 @@ Data about ireland were from Open Street Maps. I downloaded whole ireland (40 gb
 
 **Find terror attack in Ireland/United Kingdom**
 
-![Screenshot](Attacks.png)
+![Screenshot](images/Attacks.png)
 
 *Description*
 Get information about all attack from table attacks, where the country is Ireland/ Ireland and United Kingdom.
 
 **Get nearest shops to selected location**
 
-![Screenshot](shops.png)
+![Screenshot](images/shops.png)
 
 *Description*
 Get information about nearest supermarkets to selected point on map. Compute distance between selected poitn and supermarkets, order it by distance in ascending order and return back first 10.
 
 **Get the nearest waters**
 
-![Screenshot](waters.png)
+![Screenshot](images/waters.png)
 
 *Description*
 Get information about all waters/waterways in the distance of selected point. Compute distances between selected point and water/waterways and return the first 200 between the defined range.
