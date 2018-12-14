@@ -64,11 +64,13 @@ Get information about all waters/waterways in the distance of selected point. Co
           
 **Get the regions near to the border, and compute the number of victioms**
 
-![Screenshot](region.png)
+![Screenshot](images/region.png)
 
 *Description*
 Get informations about the regions near to border between Ireland and United Kingdom. Firstly select the region with type 4 from database (Northen Ireland), get all regions which are next to it and from this table drop of northen ireland. From these regions select out these in which was terror attacks with number of victims bigger than one. 
 After compute all number of victims and add it to every region.
+
+*The explanation and analysis of queries is in explain_queries file*
 
 ### Response (GeoJson creation)
 
