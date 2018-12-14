@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset=utf-8 />
+  <title></title>
+  <script src='https://api.mapbox.com/mapbox.js/v3.1.1/mapbox.js'></script>
+  
+  <link href='https://api.mapbox.com/mapbox.js/v3.1.1/mapbox.css' rel='stylesheet' />
+  
+	<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.js'></script>
+	<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.css' rel='stylesheet' />
+  <style>
+	
+	html, body {
+	  height: 100%;
+	}
+	.button {
+	  background-color: #555555;
+	  border: none;
+	  color: white;
+	  padding: 15px 32px;
+	  text-align: center;
+	  text-decoration: none;
+	  display: inline-block;
+	  font-size: 16px;
+	  width: 100%;
+	  margin: 2%;
+	}
+	#map-leaflet {
+	  position: absolute;
+	  left: 20%;
+	  width: 100%;
+	  height: 100%;
+	}
+	#mySidenav {
+		width: 16%;
+		border: 2% solid #73AD21;
+		height: 100%;
+		z-index: 10;
+		display: flex;	
+		flex-direction: column;
+	}
+	
+	#mySidenav > div {
+	  /* these are the flex items */
+	  flex: 1;
+	}
+	#nav{
+		display: flex;
+	}
+	#HeatMapNav{
+		width:16%
+		height: 25%
+		border: 2px solid #73AD21;
+	}
+  </style>
+</head>
+<body>
+<div id="nav">
+	<div id="mySidenav" class="sidenav">
+		<div id='HeatMapNav'>
+			<button class="button" onclick="clearAndCreateHeatMap()" >Heat map</button>
+		</div>
+		<div id='MarkersNav'>
+			<button class="button" onclick="clearAndCreateMap()" >Markers</button>
+		</div>
+		<div id='RegionsNav'>
+			<button class="button" onclick="clearAndCreateRegionsMap()">Regions</button>
+		</div>
+		<div id='RegionsNav'>
+			<button id="clearButton" class="button" onclick="clearMap()" >Clear</button>
+		</div>
+	</div>
+	<div id="main">
+		<div id="map-leaflet"></div>
+	</div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script>
+	var greenIcon = new L.Icon({
+	  iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+	  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+	  iconSize: [25, 41],
+	  iconAnchor: [12, 41],
+	  popupAnchor: [1, -34],
+	  shadowSize: [41, 41]
+	});
+	var attacks;
+	var shops;
+	var water;
+	var layerA;
+	var layersA = [];
+	var layerS;
+	var layersS = [];
+	var popup;
+	var visible;
+	var mapLayer;
+	var mapSource;
+	var url;
+	var add;
+	mapboxgl.accessToken = 'pk.eyJ1IjoieG5hZ3l0MSIsImEiOiJjanAwMHp4OHQyenVoM3FxaW1qNWR0MGE4In0.xU5ZQnYsmsoKulliOf0RLw'
+	var map = new mapboxgl.Map({
+		container: 'map-leaflet',
+		style: 'mapbox://styles/mapbox/light-v9',
+		center: [-7,53.5],
+		zoom: 6.5
+	});
+	
+	map.on('click',function(e){
+		url = "http://127.0.0.1:5000/testWater/lat="+ e.lngLat.lat + ",lon=" + e.lngLat.lng;
+		
+		mapLayer = map.getLayer('waters');
+		
+		if(typeof mapLayer !== 'undefined') {
+		  map.removeLayer('waters')
+		}
+		mapSource = map.getSource('waters');
+		
+		if(typeof mapSource !== 'undefined') {
+		  map.removeSource('waters')
+		}
+		for (i = 0; i<layersS.length;i++){
+			layersS[i].remove();
+		}
+		
+		water = $.ajax({
+			  url:"http://127.0.0.1:5000/testWater/lat="+ e.lngLat.lat + ",lon=" + e.lngLat.lng,
+			  dataType: "json",
+			  responseType: "json",
+			  success: console.log("water data successfully loaded."),
+			  error: function (xhr) {
+				alert(xhr.statusText)
+			  }
+			})
+		shops = $.ajax({
+			  url:"/shops/lat="+e.lngLat.lat + ",lon=" + e.lngLat.lng,
+			  dataType: "json",
+			  responseType: "json",
+			  success: console.log("Shops data successfully loaded."),
+			  error: function (xhr) {
+				alert(xhr.statusText)
+			  }
+			})
+		
+			map.addSource('waters', {
+				type: "geojson",
+				data: url
+			});
+			map.addLayer({
+				'id': 'waters',
+				'type': 'fill',
+				'source': 'waters',
+				'layout': {},
+				'paint': {
+					'fill-color': 'red',
+					'fill-opacity': 0.6
+				}
+			});
+		
+		$.when(shops).done(function() {
+			for (i = 0; i<shops.responseJSON.data.length;i++){
+				layersS.push(new mapboxgl.Marker({color: 'green'}).setLngLat(shops.responseJSON["data"][i]).addTo(map));
+			}
+		})
+	})
+	
+	function loadMap(){
+		map.on('load',function(){
+			map.addSource('attacks', {
+				type: "geojson",
+				data: "http://127.0.0.1:5000/test/"
+			});
+			map.addSource('regions', {
+				type: "geojson",
+				data: "http://127.0.0.1:5000/testRegion/"
+			});
+			
+			attacks = $.ajax({
+			  url:"/attacks/",
+			  dataType: "json",
+			  responseType: "json",
+			  success: console.log("Attacks data successfully loaded."),
+			  error: function (xhr) {
+				alert(xhr.statusText)
+			  }
+			})
+			createRegionsMap();
+			createMap();
+		})
+		
+		
+	}
+	
+	function createMap() {
+		$.when(attacks).done(function() {
+			for (i = 0; i<attacks.responseJSON.data.length;i++){
+				layersA.push(new mapboxgl.Marker().setLngLat(attacks.responseJSON["data"][i]).addTo(map));
+			}
+		})
+		
+	}
+	
+	function createHeatMap(){			
+		map.addLayer({
+			"id": "attack-heat",
+			"type": "heatmap",
+			"source": "attacks",
+			"maxzoom": 10,
+			"paint": {
+				// Increase the heatmap weight based on frequency and property magnitude
+				"heatmap-weight": [
+					"interpolate",
+					["linear"],
+					["get", "mag"],
+					0, 0,
+					6, 1
+				],
+				// Increase the heatmap color weight weight by zoom level
+				// heatmap-intensity is a multiplier on top of heatmap-weight
+				"heatmap-intensity": [
+					"interpolate",
+					["linear"],
+					["zoom"],
+					0, 1,
+					9, 3
+				],
+				// Color ramp for heatmap.  Domain is 0 (low) to 1 (high).
+				// Begin color ramp at 0-stop with a 0-transparancy color
+				// to create a blur-like effect.
+				"heatmap-color": [
+					"interpolate",
+					["linear"],
+					["heatmap-density"],
+					0, "rgba(33,102,172,0)",
+					0.2, "rgb(103,169,207)",
+					0.4, "rgb(209,229,240)",
+					0.6, "rgb(253,219,199)",
+					0.8, "rgb(239,138,98)",
+					1, "rgb(178,24,43)"
+				],
+				// Adjust the heatmap radius by zoom level
+				"heatmap-radius": [
+					"interpolate",
+					["linear"],
+					["zoom"],
+					0, 2,
+					9, 20
+				],
+				// Transition from heatmap to circle layer by zoom level
+				"heatmap-opacity": [
+					"interpolate",
+					["linear"],
+					["zoom"],
+					7, 1,
+					9, 0
+				],
+			}
+		}, 'waterway-label');
+
+		map.addLayer({
+			"id": "attack-point",
+			"type": "circle",
+			"source": "attacks",
+			"minzoom": 9,
+			"paint": {
+				// Size circle radius by earthquake magnitude and zoom level
+				"circle-radius": [
+					"interpolate",
+					["linear"],
+					["zoom"],
+					7, [
+						"interpolate",
+						["linear"],
+						["get", "mag"],
+						1, 1,
+						6, 4
+					],
+					16, [
+						"interpolate",
+						["linear"],
+						["get", "mag"],
+						1, 5,
+						6, 50
+					]
+				],
+				// Color circle by earthquake magnitude
+				"circle-color": [
+					"interpolate",
+					["linear"],
+					["get", "mag"],
+					1, "rgba(33,102,172,0)",
+					2, "rgb(103,169,207)",
+					3, "rgb(209,229,240)",
+					4, "rgb(253,219,199)",
+					5, "rgb(239,138,98)",
+					6, "rgb(178,24,43)"
+				],
+				"circle-stroke-color": "white",
+				"circle-stroke-width": 1,
+				// Transition from heatmap to circle layer by zoom level
+				"circle-opacity": [
+					"interpolate",
+					["linear"],
+					["zoom"],
+					7, 0,
+					8, 1
+				]
+			}
+		}, 'waterway-label');
+	}
+	
+	function createRegionsMap(){
+	
+		
+		map.addLayer({
+			'id': 'regions',
+			'type': 'fill',
+			'source': 'regions',
+			'layout': {
+				'visibility': 'none'
+			},
+			'paint': {
+				'fill-color': {
+					type: 'identity',
+					property: 'color',
+				},
+				'fill-opacity': 0.6
+			}			
+		});
+		visible = 'none'
+		
+	}
+	
+	function clearMap(){	
+		var mapLayer = map.getLayer('attack-point');
+		
+		if(typeof mapLayer !== 'undefined') {
+		  map.removeLayer('attack-point')
+		}
+		
+		var mapLayer = map.getLayer('attack-heat');
+
+		if(typeof mapLayer !== 'undefined') {
+		  map.removeLayer('attack-heat')
+		}
+		
+		var mapLayer = map.getLayer('waters');
+		
+		if(typeof mapLayer !== 'undefined') {
+		  map.removeLayer('waters')
+		}
+		
+		for (i = 0; i<layersA.length;i++){
+			layersA[i].remove();
+		}
+		for (i = 0; i<layersS.length;i++){
+			layersS[i].remove();
+		}
+		if (visible === 'visible') {
+            map.setLayoutProperty('regions', 'visibility', 'none');
+			visible = 'none'
+        }
+		
+	}
+	
+	function clearAndCreateHeatMap(){
+		clearMap();
+		createHeatMap();
+	}
+	function clearAndCreateMap(){
+		clearMap();
+		createMap();
+	}
+	function clearAndCreateRegionsMap(){
+		clearMap();
+		if (visible === 'none') {
+            map.setLayoutProperty('regions', 'visibility', 'visible');
+			visible = 'visible'
+        }
+	}
+
+	$(function() {
+		loadMap();
+	})
+</script>
+</body>
+</html>
