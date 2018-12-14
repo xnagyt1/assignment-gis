@@ -61,20 +61,4 @@ Data about ireland were from Open Street Maps. I downloaded whole ireland (40 gb
 The responses for queries are differents but every contains a geoinformation (points or polygons)
 These infromation is transformed into a valid geojson format. For this reason i was using json library in python:
 
-"data = {}
-    data['type'] = 'FeatureCollection'
-    datas = []
-    shops = getAllshops();
-    for i in range(len(shops)):
-        data1 = {}
-        data1['type'] = 'Feature'        
-        properties = {}
-        properties['name'] = shops[i][0]
-        properties['type'] = shops[i][1]
-        shop = json.loads(shops[i][2])
-        data1['properties'] = properties
-        data1['geometry'] = shop
-        datas.append(data1)
-        
-    data['features'] = datas
-    geo_json = json.dumps(data)"
+![Screenshot](data.png)
