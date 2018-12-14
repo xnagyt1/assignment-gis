@@ -56,9 +56,9 @@ Data about ireland were from Open Street Maps. I downloaded whole ireland (40 gb
 **Get the regions near to the border, and compute the number of victioms**
 ![Screenshot](region.png)
 
-### Response
+### Response (GeoJson creation)
 
-The responses for queries are differents but every contains a geoinformation (points or polygons)
+The responses from queries are differents but every contains a geoinformation (points or polygons).
 These infromation is transformed into a valid geojson format. For this reason i was using json library in python:
 
 ![Screenshot](data.png)
