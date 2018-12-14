@@ -46,19 +46,29 @@ Data about ireland were from Open Street Maps. I downloaded whole ireland (40 gb
 ![Screenshot](Attacks.png)
 
 *Description*
-
+Get information about all attack from table attacks, where the country is Ireland/ Ireland and United Kingdom.
 
 **Get nearest shops to selected location**
 
 ![Screenshot](shops.png)
-          
+
+*Description*
+Get information about nearest supermarkets to selected point on map. Compute distance between selected poitn and supermarkets, order it by distance in ascending order and return back first 10.
+
 **Get the nearest waters**
 
 ![Screenshot](waters.png)
+
+*Description*
+Get information about all waters/waterways in the distance of selected point. Compute distances between selected point and water/waterways and return the first 200 between the defined range.
           
 **Get the regions near to the border, and compute the number of victioms**
 
 ![Screenshot](region.png)
+
+*Description*
+Get informations about the regions near to border between Ireland and United Kingdom. Firstly select the region with type 4 from database (Northen Ireland), get all regions which are next to it and from this table drop of northen ireland. From these regions select out these in which was terror attacks with number of victims bigger than one. 
+After compute all number of victims and add it to every region.
 
 ### Response (GeoJson creation)
 
