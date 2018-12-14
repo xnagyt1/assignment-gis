@@ -41,51 +41,20 @@ Data about ireland were from Open Street Maps. I downloaded whole ireland (40 gb
 
 ## Queries
 
-**Find terror attack in Ireland**
+**Find terror attack in Ireland/United Kingdom**
 
-`SELECT city,ST_AsGeoJSON(geom) FROM attacks where country_text = 'Ireland'`
+![Screenshot](attacks.png)
 
 **Get nearest shops to selected location**
 
-`SELECT DISTINCT name,shop,ST_AsGeoJSON(ST_Transform (way, 4326)) as way,
-					ST_Distance(ST_Transform (way, 4326)::Geography , ST_SetSRID(ST_MakePoint(%s,%s), 4326)::Geography ) as dist_me 
-          FROM planet_osm_point where shop = 'supermarket' and name is not null
-					ORDER BY dist_me ASC LIMIT 10;`
+![Screenshot](shops.png)
           
 **Get the nearest waters**
 
-'SELECT DISTINCT ST_AsGeoJSON(ST_Transform (way, 4326)) as way, 
-					ST_Distance(ST_Transform (way, 4326)::Geography , ST_SetSRID(ST_MakePoint(%s,%s), 4326)::Geography ) as dist_me
-					FROM planet_osm_polygon where water is not null and name is not null and 
-				    ST_Distance(ST_Transform (way, 4326)::Geography , ST_SetSRID(ST_MakePoint(%s,%s), 4326)::Geography ) < 2000
-					union
-					SELECT DISTINCT ST_AsGeoJSON(ST_Transform (way, 4326)) as way,
-				    ST_Distance(ST_Transform (way, 4326)::Geography , ST_SetSRID(ST_MakePoint(%s,%s), 4326)::Geography ) as dist_me
-					FROM planet_osm_polygon where waterway is not null and name is not null and 
-				    ST_Distance(ST_Transform (way, 4326)::Geography , ST_SetSRID(ST_MakePoint(%s,%s), 4326)::Geography )<2000
-					ORDER BY dist_me ASC LIMIT 200;'
+![Screenshot](waters.png)
           
 **Get the regions near to the border, and compute the number of victioms**
-
-'select attacks.nkill, ST_AsGeoJSON(attacks.geom), attacks.geom, planet_osm_polygon.way,
-        ST_AsGeoJSON(ST_Transform (planet_osm_polygon.way, 4326)), t3.sum
-            from (select t1.name, t2.name, ST_AsGeoJSON(ST_Transform (t2.way, 4326)),t2.way
-            from (select name, way from planet_osm_polygon where admin_level::int = 4) as t1,
-              (select name, way from planet_osm_polygon where admin_level::int = 6) as t2
-            where ST_Intersects( ST_Transform (t1.way, 4326), ST_Transform (t2.way, 4326))
-            and not ST_Contains( ST_Transform (t1.way, 4326), ST_Transform (t2.way, 4326))) as planet_osm_polygon,
-            (SELECT city, ST_AsGeoJSON(geom),geom,nkill FROM attacks where country_text = 'Ireland' and nkill::int > 0) as attacks,
-            (select planet_osm_polygon.way, ST_AsGeoJSON(ST_Transform (planet_osm_polygon.way, 4326)), sum(attacks.nkill)
-                				   from (select t1.name, t2.name, ST_AsGeoJSON(ST_Transform (t2.way, 4326)),t2.way
-                           from (select name, way from planet_osm_polygon where admin_level::int = 4) as t1,
-                              (select name, way from planet_osm_polygon where admin_level::int = 6) as t2
-                           where ST_Intersects( ST_Transform (t1.way, 4326), ST_Transform (t2.way, 4326))
-                							 and not ST_Contains( ST_Transform (t1.way, 4326), ST_Transform (t2.way, 4326))) as planet_osm_polygon,
-                           (SELECT city, ST_AsGeoJSON(geom),geom,nkill FROM attacks where country_text = 'Ireland' and nkill::int > 0)                              as attacks
-                				   where ST_Intersects(ST_SetSRID(attacks.geom,4326), ST_Transform (planet_osm_polygon.way, 4326))
-                				   group by (planet_osm_polygon.way)) as t3		 
-             where ST_Intersects(ST_SetSRID(attacks.geom,4326), ST_Transform (planet_osm_polygon.way, 4326)) 
-             and planet_osm_polygon.way = t3.way'
+![Screenshot](region.png)
 
 ### Response
 
