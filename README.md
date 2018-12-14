@@ -22,6 +22,6 @@ Fill in (either in English, or in Slovak):
 
 **Application description**: V mojom projekte by som chcel kombinovat data ziskane z open street map az z kaggle databazi, ktory obsahuje udaje o terror utokoch od 1970. Z tychto dat by som rad zobrazil zaujimave a uzitocne informacie, napr. v ktorom meste boli najvecsie a najcastejsie utoky.
 
-**Data source**: [Open Street Maps](https://www.openstreetmap.org/), {Kaggle}(https://www.kaggle.com/START-UMD/gtd)
+**Data source**: [Open Street Maps](https://www.openstreetmap.org/), [Kaggle](https://www.kaggle.com/START-UMD/gtd)
 
 **Technologies used**: Python
