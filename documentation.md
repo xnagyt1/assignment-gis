@@ -77,4 +77,4 @@ After compute all number of victims and add it to every region.
 The responses from queries are differents but every contains a geoinformation (points or polygons).
 These infromation is transformed into a valid geojson format. For this reason i was using json library in python:
 
-![Screenshot](data.png)
+![Screenshot](images/data.png)
